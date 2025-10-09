@@ -16,7 +16,3 @@ import "time"
  CommentList[]Comment`json:"comments"`
  CreatedAt time.Time `json:"created_at"`
  }
-
- type a struct {
-	 A int `json:"a"`
- }
