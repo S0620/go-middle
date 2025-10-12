@@ -61,7 +61,21 @@ func SelectArticleDetail(db*sql.DB, articleID int) (models.Article, error) {
 		where article_id = ?;
 	`
 	//ここから問３
-   
+    row := db.QueryRow(sqlStr, articleID)
+	if err := row.Err(); err != nil {
+		return models.Article{}, err
+	}
+
+	var article models.Article
+	var createdTime sql.NullTime
+	err := row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &createdTime)
+	if err != nil {
+		return models.Article{}, err
+	}
+
+	if createdTime.Valid {
+		article.CreatedAt = createdTime.Time
+	}
 	
 	//ここまで
 	return article, nil
