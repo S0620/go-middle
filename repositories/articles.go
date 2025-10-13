@@ -80,3 +80,43 @@ func SelectArticleDetail(db*sql.DB, articleID int) (models.Article, error) {
 	//ここまで
 	return article, nil
 }
+
+func UpdateNiceNum(db *sql.DB, articleID int) error {
+	const sqlGetNice = `
+	    select nice
+		from articles
+		where article_id = ?;
+	`
+
+    const sqlUpdateNice = `update articles set nice = ? where article_id = ?`
+
+ // (問4) 指定されたIDの記事のいいね数を+1するようにデータベースの中身を更新する処理
+    tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	var nicenum int
+	row := tx.QueryRow(sqlGetNice, articleID)
+	err = row.Scan(&nicenum)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(sqlUpdateNice, nicenum+1, articleID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+ //ここまで
+    return nil
+}
+
+
+
