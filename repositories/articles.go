@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"database/sql"
-
 	"myapi/models"
 )
 
@@ -116,29 +115,6 @@ func UpdateNiceNum(db *sql.DB, articleID int) error {
 
  //ここまで
     return nil
-}
-
-//新規投稿をデータベースにinsertする関数
-//->データベースに保存したコメント内容と、発生したエラーを返り値にする
-func InsertComment(db *sql.DB, comment models.Comment) (models.Comment, error) {
-	const sqlStr = `
-	    insert into comments (article_id, message, created_at) values
-		(?, ?, now())
-	`
-
-	 //(問5)構造体models.Commentを受け取って、それをデータベースに挿入する処理
-	 result, err := db.Exec(sqlStr, comment.ArticleID, comment.Message)
-	 if err != nil {
-		return models.Comment{}, err
-	 }
-	 newID, err := result.LastInsertId()
-	 if err != nil {
-		return models.Comment{}, err
-	 }
-	 newComment := comment
-	 newComment.CommentID = int(newID)
-	 //ここまで
-	return newComment, nil
 }
 
 
