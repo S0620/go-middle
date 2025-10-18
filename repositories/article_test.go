@@ -3,60 +3,76 @@ package repositories_test
 import (
 	"testing"
 	"myapi/repositories"
-	"database/sql"
 	"myapi/models"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
 
+//SelectArticleList関数のテスト
+func TestSelectArticleList(t *testing.T) {
+	expectedNum := 4
+	got, err := repositories.SelectArticleList(testDB, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if num := len(got); num != expectedNum {
+		t.Errorf("want %d but got %d articles\n", expectedNum, num)
+	}
+}
+
 //SelectArticleDetail関数のテスト
 func TestSelectArticleDetail(t *testing.T) {
-	dbUser := "docker"
-	dbPassword := "docker"
-	dbDatabase := "sampledb"
-	dbConn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
-
-	db, err := sql.Open("mysql", dbConn)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		testTitle string
+		expected models.Article
+	}{
+		{
+		    testTitle: "subtest1",
+		    expected: models.Article{
+			    ID:       1,
+			    Title:    "firstPost",
+			    Contents: "This is my first blog",
+			    UserName: "saki",
+			    NiceNum:  3,
+		    },
+		}, {
+			testTitle:  "subtest2",
+			expected: models.Article{
+				ID:       2,
+				Title:    "2nd",
+				Contents: "Second blog post",
+				UserName: "saki",
+				NiceNum:  4,
+			},
+		},
 	}
-	defer db.Close()
+    for _, test := range tests {
+		t.Run(test.testTitle, func(t *testing.T) {
+			got, err := repositories.SelectArticleDetail(testDB, test.expected.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	expected := models.Article {
-	    ID:       1,
-        Title:    "firstPost",
-        Contents: "This is my first blog",
-        UserName: "saki",
-        NiceNum : 3,
-    }
+			if got.ID != test.expected.ID {
+				t.Errorf("ID: get %d but want %d\n", got.ID, test.expected.ID)
+			}
 
-	//テスト対象となる関数を実行
+			if got.Title != test.expected.Title {
+				t.Errorf("Title: get %s but want %s\n", got.Title, test.expected.Title)
+			}
 
-	got, err := repositories.SelectArticleDetail(db, expected.ID)
-	if err != nil {
-		//関数の実行そのものに失敗した場合、テストも失敗させる
-		t.Fatal(err)
+			if got.Contents != test.expected.Contents {
+				t.Errorf("Content: get %s but want %s\n", got.Contents, test.expected.Contents)
+			}
+
+			if got.UserName != test.expected.UserName {
+				t.Errorf("UserName: get %s but want %s\n", got.UserName, test.expected.UserName)
+			}
+
+			if got.NiceNum != test.expected.NiceNum {
+				t.Errorf("NiceNum: get %d but want %d\n", got.NiceNum, test.expected.NiceNum)
+			}
+		})
 	}
-
-	if got.ID != expected.ID {
-		t.Errorf("ID: get %d but want %d\n", got.ID, expected.ID)
-	}
-
-	if got.Title != expected.Title {
-		t.Errorf("Title: get %s but want %s\n", got.Title, expected.Title)
-	}
-
-	if got.Contents != expected.Contents {
-		t.Errorf("Content: get %s but want %s\n", got.Contents, expected.Contents)
-	}
-
-	if got.UserName != expected.UserName {
-		t.Errorf("UserName: get %s but want %s\n", got.UserName, expected.UserName)
-	}
-
-	if got.NiceNum != expected.NiceNum {
-		t.Errorf("NiceNum: get %d but want %d\n", got.NiceNum, expected.NiceNum)
-	}
-
-	//t.Fatalもt.Errorも実行されずに関数が終わった場合にはテスト成功
 }
+
