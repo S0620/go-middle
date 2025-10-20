@@ -1,15 +1,17 @@
 package repositories_test
 
 import (
-	"testing"
-	"myapi/repositories"
 	"myapi/models"
+	"myapi/repositories"
+	"myapi/repositories/testdata"
+	"testing"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 //SelectArticleList関数のテスト
 func TestSelectArticleList(t *testing.T) {
-	expectedNum := 2
+	expectedNum := len(testdata.ArticleTestData)
 	got, err := repositories.SelectArticleList(testDB, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -28,22 +30,12 @@ func TestSelectArticleDetail(t *testing.T) {
 	}{
 		{
 		    testTitle: "subtest1",
-		    expected: models.Article{
-			    ID:       1,
-			    Title:    "firstPost",
-			    Contents: "This is my first blog",
-			    UserName: "saki",
-			    NiceNum:  3,
-		    },
+		    expected:  testdata.ArticleTestData[0],
+		    
 		}, {
 			testTitle:  "subtest2",
-			expected: models.Article{
-				ID:       2,
-				Title:    "2nd",
-				Contents: "Second blog post",
-				UserName: "saki",
-				NiceNum:  4,
-			},
+			expected:   testdata.ArticleTestData[1],
+			
 		},
 	}
     for _, test := range tests {
@@ -106,4 +98,39 @@ func TestInsertArticle(t *testing.T) {
 		testDB.Exec(sqlStr, article.Title, article.Contents, article.UserName)
 		testDB.Exec(sqlReset)
 	})
+}
+
+//UpdateNiceNum関数のテスト
+func TestUpdateNiceNum(t *testing.T) {
+	articleID := 1
+	initial, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal("fail to get initial data")
+	}
+	err = repositories.UpdateNiceNum(testDB, initial.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated, err := repositories.SelectArticleDetail(testDB, initial.ID)
+	if err != nil {
+		t.Fatal("fail to get updated data")		
+	}
+
+	if updated.NiceNum != initial.NiceNum + 1 {
+		t.Errorf("fail to update nice num")
+	}
+
+	t.Cleanup(func() {
+		const sqlUpdate = `
+			update articles set nice = ?
+			where article_id = ?
+			`
+
+		_, err = testDB.Exec(sqlUpdate, initial.NiceNum, articleID)
+		if err != nil {
+			t.Error(err)
+		}
+	})
+
+
 }
