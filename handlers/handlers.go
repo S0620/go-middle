@@ -43,9 +43,9 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	} else {
 		page = 1
 	}
-//暫定でこれを追加することで
-//pageが使われていないというコンパイルエラーを回避している
-log.Println(page)
+	//暫定でこれを追加することで
+	//pageが使われていないというコンパイルエラーを回避している
+	log.Println(page)
 
 	articlelist := []models.Article{models.Article1, models.Article2}
 	json.NewEncoder(w).Encode(articlelist)
@@ -53,10 +53,7 @@ log.Println(page)
 
 //GET /article/{id} のハンドラ
 func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
-	articleID , err := strconv.Atoi(mux.Vars(req)["id"])
-    if err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
-	}
+	articleID := mux.Vars(req)["id"]
 //暫定でこれを追加することで
 //articleIDが使われていないというコンパイルエラーを回避している
     log.Println(articleID)
@@ -69,8 +66,7 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
-		http.Error(w, "fail to decode json\n", http.StatusInternalServerError)
-		return
+		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 	article := reqArticle
     json.NewEncoder(w).Encode(article)
@@ -79,8 +75,7 @@ func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 	var reqComment models.Comment
 	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
-		http.Error(w, "fail to decode json\n", http.StatusInternalServerError)
-		return
+		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 	comment := reqComment
 	json.NewEncoder(w).Encode(comment)
