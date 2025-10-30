@@ -47,3 +47,22 @@ func PostArticleService(article models.Article) (models.Article, error) {
 
 	return newarticle, nil
 }
+
+//ArticleListHandlerで使うことを想定したサービス
+//指定pageの記事一覧を返却
+
+func GetArticleListService(page int) ([]models.Article, error) {
+    db, err := connectDB()
+	if err != nil {
+		return []models.Article{}, err
+	}
+	defer db.Close()
+
+	articleList, err := repositories.SelectArticleList(db, page)
+	if err != nil {
+		return []models.Article{}, err
+	}
+
+	return articleList, nil
+}
+
