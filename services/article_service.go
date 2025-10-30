@@ -66,6 +66,8 @@ func GetArticleListService(page int) ([]models.Article, error) {
 	return articleList, nil
 }
 
+//PostNiceHandlerで使うことを想定したサービス
+//指定IDの記事のいいね数を+1して、結果を返却
 func PostNiceService(article models.Article) (models.Article, error) {
 	db, err := connectDB()
 	if err != nil {
