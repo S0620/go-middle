@@ -66,3 +66,24 @@ func GetArticleListService(page int) ([]models.Article, error) {
 	return articleList, nil
 }
 
+func PostNiceService(article models.Article) (models.Article, error) {
+	db, err := connectDB()
+	if err != nil {
+		return models.Article{}, err
+	}
+	defer db.Close()
+
+	err = repositories.UpdateNiceNum(db, article.ID)
+	if err != nil {
+		return models.Article{}, err
+	}
+	return models.Article{
+		ID:        article.ID,
+		Title:     article.Title,
+		Contents:  article.Contents,
+		UserName:  article.UserName,
+		NiceNum:   article.NiceNum + 1,
+		CreatedAt: article.CreatedAt,
+	},nil
+}
+
