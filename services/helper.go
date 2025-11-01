@@ -16,7 +16,7 @@ var (
 )
 
 func connectDB() (*sql.DB, error) {
-	db, err := sql.Open("myapi", dbConn)
+	db, err := sql.Open("mysql", dbConn)
 	if err != nil {
 		return nil, err
 	}
