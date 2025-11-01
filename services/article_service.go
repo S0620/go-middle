@@ -54,7 +54,7 @@ func PostArticleService(article models.Article) (models.Article, error) {
 func GetArticleListService(page int) ([]models.Article, error) {
     db, err := connectDB()
 	if err != nil {
-		return []models.Article{}, err
+		return nil, err
 	}
 	defer db.Close()
 
