@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"io"
 	"myapi/models"
-	"myapi/services"
+	"myapi/controllers/services"
 	"net/http"
 	"strconv"
 	"github.com/gorilla/mux"
 )
 
 type MyAppController struct {
-	service *services.MyAppService
+	service services.MyAppServicer
 }
 
-func NewMyAppController(s *services.MyAppService) *MyAppController {
+func NewMyAppController(s services.MyAppServicer) *MyAppController {
 	return &MyAppController{service: s}
 }
 
