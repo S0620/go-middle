@@ -3,6 +3,7 @@ package services
 import (
 	"myapi/models"
 	"myapi/repositories"
+	"myapi/apperrors"
 	
 )
 
@@ -31,6 +32,7 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 func (s *MyAppService) PostArticleService(article models.Article) (models.Article, error) {
 	newArticle, err := repositories.InsertArticle(s.db, article)
 	if err != nil {
+		err = apperrors.InsertDataFailed.Wrap(err, "fail to record data")
 		return models.Article{}, err
 	}
 
