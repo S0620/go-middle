@@ -4,6 +4,8 @@ import (
 	"myapi/models"
 	"myapi/repositories"
 	"myapi/apperrors"
+	"errors"
+	"database/sql"
 	
 )
 
@@ -14,10 +16,16 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	//1.repositories層の関数SelectArticleDetailで記事の詳細を取得
 	article, err := repositories.SelectArticleDetail(s.db, articleID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = apperrors.NAData.Wrap(err, "no data")
+			return models.Article{}, err
+		}
+		err = apperrors.GetDataFiled.Wrap(err, "fail to get data")
 		return models.Article{}, err
 	}
 	commentlist, err := repositories.SelectCommentList(s.db, articleID)
 	if err != nil {
+		err = apperrors.GetDataFiled.Wrap(err, "fail to get data")
 		return models.Article{}, err
 	}
 	//3.2で得たコメント一覧を、1で得たArticle構造体に紐付ける
@@ -46,9 +54,14 @@ func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error)
 
 	articleList, err := repositories.SelectArticleList(s.db, page)
 	if err != nil {
-		return []models.Article{}, err
+		err = apperrors.GetDataFiled.Wrap(err, "fail to get data")
+		return nil, err
 	}
 
+	if len(articleList) == 0 {
+		err = apperrors.GetDataFiled.Wrap(ErrNoData, "no data")
+		return nil, err
+	}
 	return articleList, nil
 }
 
@@ -58,6 +71,11 @@ func (s *MyAppService) PostNiceService(article models.Article) (models.Article, 
 
 	err := repositories.UpdateNiceNum(s.db, article.ID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = apperrors.NoTagetData.Wrap(err, "does not exist target article")
+			return models.Article{}, err
+		}
+		err = apperrors.UpdateDataFailed.Wrap(err, "fail to update nice count")
 		return models.Article{}, err
 	}
 	return models.Article{

@@ -6,6 +6,10 @@ const (
 	Unknown ErrCode = "U000"
 
 	InsertDataFailed ErrCode = "S001"
+	GetDataFiled	 ErrCode = "S002"
+	NAData			 ErrCode = "S003"
+	NoTagetData		 ErrCode = "S004"
+	UpdateDataFailed ErrCode = "S005"
 )
 
 func (code ErrCode) Wrap(err error, message string) error {
