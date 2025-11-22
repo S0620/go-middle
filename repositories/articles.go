@@ -25,8 +25,7 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 	id, _ :=result.LastInsertId()
 	newArticle.ID = int(id)
 	//ここまで
-	
-    return newArticle, nil
+	return newArticle, nil
 }
 
 func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
@@ -64,7 +63,7 @@ func SelectArticleDetail(db*sql.DB, articleID int) (models.Article, error) {
 	if err := row.Err(); err != nil {
 		return models.Article{}, err
 	}
-
+	
 	var article models.Article
 	var createdTime sql.NullTime
 	err := row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &createdTime)
@@ -79,6 +78,7 @@ func SelectArticleDetail(db*sql.DB, articleID int) (models.Article, error) {
 	//ここまで
 	return article, nil
 }
+
 
 func UpdateNiceNum(db *sql.DB, articleID int) error {
 	const sqlGetNice = `

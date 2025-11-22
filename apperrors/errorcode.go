@@ -8,7 +8,7 @@ const (
 	InsertDataFailed ErrCode = "S001"
 	GetDataFiled	 ErrCode = "S002"
 	NAData			 ErrCode = "S003"
-	NoTagetData		 ErrCode = "S004"
+	NoTargetData		 ErrCode = "S004"
 	UpdateDataFailed ErrCode = "S005"
 
 	ReqBodyDecodeFailed ErrCode = "R001"
