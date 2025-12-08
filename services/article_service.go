@@ -23,6 +23,7 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 		err = apperrors.GetDataFiled.Wrap(err, "fail to get data")
 		return models.Article{}, err
 	}
+	//2.コメント一覧を取得
 	commentlist, err := repositories.SelectCommentList(s.db, articleID)
 	if err != nil {
 		err = apperrors.GetDataFiled.Wrap(err, "fail to get data")
