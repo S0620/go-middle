@@ -24,7 +24,7 @@ func main() {
 		return
 	}
 	
-	r := api.NewRouter(db)
+	r := api.NewRouter(db)//a
 
 
 	log.Println("server start at port 8080")
