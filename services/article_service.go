@@ -1,12 +1,12 @@
 package services
 
 import (
+	"database/sql"
+	"errors"
+	"myapi/apperrors"
 	"myapi/models"
 	"myapi/repositories"
-	"myapi/apperrors"
-	"errors"
-	"database/sql"
-	"sync"
+
 )
 
 //ArticleDetailHandlerで使うことを想定したサービス
@@ -16,28 +16,40 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	var commentList []models.Comment
 	var articleGetErr, commentGetErr error
 
-	var amu sync.Mutex
-	var cmu sync.Mutex
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-	
+	type articleResult struct {
+		article models.Article
+		err error
+	}
+	articleChan := make(chan articleResult)
+	defer close(articleChan)
 	//1.repositories層の関数SelectArticleDetailで記事の詳細を取得
-	go func(db *sql.DB, articleID int) {
-		defer wg.Done()
-		amu.Lock()
-		article, articleGetErr =  repositories.SelectArticleDetail(db, articleID)
-		amu.Unlock()
-	}(s.db, articleID)
-	
-	go func(db *sql.DB, articleID int) {
-		defer wg.Done()
-		cmu.Lock()
-		commentList, commentGetErr = repositories.SelectCommentList(db, articleID)		
-		cmu.Unlock()
-	}(s.db, articleID)
+	go func(ch chan<- articleResult, db *sql.DB, articleID int) {
+		article, err := repositories.SelectArticleDetail(s.db, articleID)
+		ch <- articleResult{article: article, err: err}
+	}(articleChan, s.db, articleID)
 
-	wg.Wait()
+	type commentResult struct {
+		commentList *[]models.Comment //1つの記事に対してコメントは複数個つく可能性があるため*[]を加えている
+		err error
+	}
+	commentChan := make(chan commentResult)
+	defer close(commentChan)
+
+	go func(ch chan<- commentResult, db *sql.DB, articleID int) {
+		commentList, err := repositories.SelectCommentList(s.db, articleID)
+		ch <- commentResult{commentList: &commentList, err: err}
+	}(commentChan, s.db, articleID)
+
+	//ゴールーチンをselect文で処理。forループを使用して2回実行している
+	for i:= 0; i < 2; i++ {
+		select {
+		case ar := <-articleChan:
+			article, articleGetErr = ar.article, ar.err
+		case cr := <-commentChan:
+			commentList, commentGetErr = *cr.commentList, cr.err
+		}
+	}
+
 	
 	if articleGetErr != nil {
 		if errors.Is(articleGetErr, sql.ErrNoRows) {
