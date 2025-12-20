@@ -24,7 +24,7 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	defer close(articleChan)
 	//1.repositories層の関数SelectArticleDetailで記事の詳細を取得
 	go func(ch chan<- articleResult, db *sql.DB, articleID int) {
-		article, err := repositories.SelectArticleDetail(s.db, articleID)
+		article, err := repositories.SelectArticleDetail(db, articleID)
 		ch <- articleResult{article: article, err: err}
 	}(articleChan, s.db, articleID)
 
@@ -56,12 +56,12 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 			articleGetErr = apperrors.NAData.Wrap(articleGetErr, "no data")
 			return models.Article{}, articleGetErr
 		}
-		articleGetErr = apperrors.GetDataFiled.Wrap(articleGetErr, "fail to get data")
+		articleGetErr = apperrors.GetDataFailed.Wrap(articleGetErr, "fail to get data")
 		return models.Article{}, articleGetErr
 	}
 	//2.コメント一覧を取得
 	if commentGetErr != nil {
-		err := apperrors.GetDataFiled.Wrap(commentGetErr, "fail to get data")
+		err := apperrors.GetDataFailed.Wrap(commentGetErr, "fail to get data")
 		return models.Article{}, err
 	}
 	//3.2で得たコメント一覧を、1で得たArticle構造体に紐付ける
@@ -90,12 +90,12 @@ func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error)
 
 	articleList, err := repositories.SelectArticleList(s.db, page)
 	if err != nil {
-		err = apperrors.GetDataFiled.Wrap(err, "fail to get data")
+		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
 		return nil, err
 	}
 
 	if len(articleList) == 0 {
-		err = apperrors.GetDataFiled.Wrap(ErrNoData, "no data")
+		err = apperrors.NAData.Wrap(ErrNoData, "no data")
 		return nil, err
 	}
 	return articleList, nil
