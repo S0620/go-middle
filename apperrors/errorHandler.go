@@ -1,11 +1,11 @@
 package apperrors
 
 import (
-	"net/http"
-	"errors"
+	"log"
 	"encoding/json"
-	
-	
+	"errors"
+	"myapi/api/middlewares"
+	"net/http"
 )
 
 func ErrorHandler(w http.ResponseWriter, req *http.Request, err error) {
@@ -19,6 +19,9 @@ func ErrorHandler(w http.ResponseWriter, req *http.Request, err error) {
 			Err:     err,
 		}
 	}
+
+	traceID := middlewares.GetTraceID(req.Context())
+	log.Printf("[%d]error: %s\n", traceID, appErr)
 	var statusCode int
 	switch appErr.ErrCode {
 	case NAData:
